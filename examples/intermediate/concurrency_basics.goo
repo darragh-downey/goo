@@ -1,0 +1,72 @@
+// concurrency_basics.goo
+//
+// This example demonstrates the basic concurrency features of Goo.
+// It shows how to create goroutines (lightweight threads) and use channels
+// for communication between concurrent tasks.
+//
+// Expected output:
+// > Starting worker 1
+// > Starting worker 2
+// > Starting worker 3
+// > Worker 1 processing task 1
+// > Worker 3 processing task 2
+// > Worker 2 processing task 3
+// > Worker 1 processing task 4
+// > Worker 3 processing task 5
+// > All tasks completed
+// Note: The exact order of worker output may vary between runs due to concurrency.
+
+import std.io
+import std.concurrency
+import std.time
+
+// Define a worker function that will run concurrently
+func worker(id: int, tasks: chan int, results: chan string) {
+    io.println("Starting worker {}", id)
+    
+    // Process tasks until the channel is closed
+    for task in tasks {
+        // Simulate work with a short delay
+        time.sleep(time.milliseconds(100 * (id % 3 + 1)))
+        
+        // Process the task
+        io.println("Worker {} processing task {}", id, task)
+        
+        // Send a result
+        results <- "Task {} completed by worker {}".format(task, id)
+    }
+}
+
+func main() {
+    // Create channels for tasks and results
+    let tasks = chan<int>.new(capacity: 10)
+    let results = chan<string>.new(capacity: 10)
+    
+    // Number of tasks and workers
+    let num_tasks = 5
+    let num_workers = 3
+    
+    // Start workers
+    for i in 1..=num_workers {
+        // Launch each worker as a separate goroutine
+        go worker(i, tasks, results)
+    }
+    
+    // Send tasks to workers
+    for task in 1..=num_tasks {
+        tasks <- task
+    }
+    
+    // Close the tasks channel to signal workers that no more tasks will be sent
+    close(tasks)
+    
+    // Collect all results
+    let completed_tasks = 0
+    while completed_tasks < num_tasks {
+        // Wait for a result from any worker
+        let result = <-results
+        completed_tasks += 1
+    }
+    
+    io.println("All tasks completed")
+} 

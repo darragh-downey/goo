@@ -1,0 +1,77 @@
+package main
+
+import "kernel"
+
+// User-space program that uses the memory manager kernel module
+user func main() {
+    // Connect to the kernel module's channels
+    channel memReq chan<kernel.MemoryManager.Request>[endpoint="memory"] = new;
+    channel memResp chan<kernel.MemoryManager.Response>[endpoint="memory"] = new;
+    
+    // Allocate memory
+    allocRequest := kernel.MemoryManager.Request{
+        op: 0,         // 0 = allocate
+        size: 1024,    // 1KB
+        address: 0     // Not used for allocation
+    };
+    
+    // Send the request to the kernel
+    memReq <- allocRequest;
+    
+    // Wait for the response
+    response := <-memResp;
+    
+    if response.success {
+        println("Memory allocated at address: ", response.address);
+        
+        // Use the memory for something
+        safe {
+            // Perform memory operations in a safe context
+            // which ensures bounds checking
+            // ...
+        }
+        
+        // Free the memory when done
+        freeRequest := kernel.MemoryManager.Request{
+            op: 1,                 // 1 = free
+            size: 0,               // Not used for free
+            address: response.address
+        };
+        
+        // Send the free request
+        memReq <- freeRequest;
+        
+        // Wait for the response
+        freeResponse := <-memResp;
+        
+        if freeResponse.success {
+            println("Memory successfully freed");
+        } else {
+            println("Failed to free memory: ", freeResponse.error);
+        }
+    } else {
+        println("Failed to allocate memory: ", response.error);
+    }
+    
+    // Try to perform an operation and recover from errors
+    try {
+        // Attempt some operation that might fail
+        performRiskyOperation();
+    } recover (err) {
+        // Handle the error
+        println("Recovered from error: ", err);
+    }
+}
+
+// A function that might fail
+func performRiskyOperation() {
+    // Simulate a failure
+    panic("Something went wrong!");
+}
+
+// Supervised function execution with automatic recovery
+func supervisedOperation() {
+    // The supervise keyword automatically handles errors
+    // and restarts the function if it fails
+    supervise performRiskyOperation();
+} 

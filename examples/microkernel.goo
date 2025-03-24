@@ -1,0 +1,43 @@
+package kernel
+
+comptime var VERSION int = 1
+
+comptime build {
+    target = "x86_64-microkernel";
+    optimize = "Release";
+}
+
+kernel func main() {
+    var logCh cap pub chan<int> @ "inproc://kernel-log"
+    var driverCh cap pair chan<int>
+    
+    supervise {
+        go logger(logCh)
+        go driver(driverCh)
+    }
+    
+    go parallel for 0..4 {
+        try <-logCh = 42 ! IOError
+        recover { super "Log failed" }
+    }
+    
+    super "Kernel initialized"
+}
+
+module logger {
+    user func start(ch cap sub chan<int>) {
+        try {
+            x := <-ch
+            super x
+        } recover {
+            super "Logger crashed, restarting"
+        }
+    }
+}
+
+module driver {
+    user func start(ch cap pair chan<int>) {
+        try <-ch = 99 ! IOError
+        recover { super "Driver failed" }
+    }
+} 

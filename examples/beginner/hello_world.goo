@@ -1,0 +1,20 @@
+// hello_world.goo
+//
+// A simple "Hello, World!" program in Goo.
+// This demonstrates the basic structure of a Goo program and how to use
+// the standard I/O library for console output.
+//
+// Expected output:
+// > Hello, World!
+// > Welcome to the Goo programming language!
+
+import std.io
+
+// The main function is the entry point of a Goo program
+func main() {
+    // Print a string to the console
+    io.println("Hello, World!")
+    
+    // Print another line with a different message
+    io.println("Welcome to the Goo programming language!")
+} 

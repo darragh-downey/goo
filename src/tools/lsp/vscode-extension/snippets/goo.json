@@ -1,0 +1,156 @@
+{
+  "Function Declaration": {
+    "prefix": "fn",
+    "body": [
+      "fn ${1:function_name}(${2:parameters}) ${3:-> ReturnType} {",
+      "\t${4:// function body}",
+      "}"
+    ],
+    "description": "Function declaration"
+  },
+  "Main Function": {
+    "prefix": "main",
+    "body": [
+      "fn main() {",
+      "\t${1:// main function body}",
+      "}"
+    ],
+    "description": "Main function"
+  },
+  "If Statement": {
+    "prefix": "if",
+    "body": [
+      "if ${1:condition} {",
+      "\t${2:// if body}",
+      "}"
+    ],
+    "description": "If statement"
+  },
+  "If-Else Statement": {
+    "prefix": "ifelse",
+    "body": [
+      "if ${1:condition} {",
+      "\t${2:// if body}",
+      "} else {",
+      "\t${3:// else body}",
+      "}"
+    ],
+    "description": "If-else statement"
+  },
+  "For Loop": {
+    "prefix": "for",
+    "body": [
+      "for ${1:i} in ${2:0..10} {",
+      "\t${3:// for body}",
+      "}"
+    ],
+    "description": "For loop"
+  },
+  "While Loop": {
+    "prefix": "while",
+    "body": [
+      "while ${1:condition} {",
+      "\t${2:// while body}",
+      "}"
+    ],
+    "description": "While loop"
+  },
+  "Struct Declaration": {
+    "prefix": "struct",
+    "body": [
+      "struct ${1:StructName} {",
+      "\t${2:field1}: ${3:Type},",
+      "\t${4:field2}: ${5:Type},",
+      "}"
+    ],
+    "description": "Struct declaration"
+  },
+  "Enum Declaration": {
+    "prefix": "enum",
+    "body": [
+      "enum ${1:EnumName} {",
+      "\t${2:Variant1},",
+      "\t${3:Variant2},",
+      "\t${4:Variant3},",
+      "}"
+    ],
+    "description": "Enum declaration"
+  },
+  "Match Expression": {
+    "prefix": "match",
+    "body": [
+      "match ${1:expression} {",
+      "\t${2:pattern1} => ${3:result1},",
+      "\t${4:pattern2} => ${5:result2},",
+      "\t_ => ${6:default_result},",
+      "}"
+    ],
+    "description": "Match expression"
+  },
+  "Import Statement": {
+    "prefix": "import",
+    "body": [
+      "import ${1:module};"
+    ],
+    "description": "Import statement"
+  },
+  "Import From Statement": {
+    "prefix": "importfrom",
+    "body": [
+      "from ${1:module} import ${2:item};"
+    ],
+    "description": "Import from statement"
+  },
+  "Variable Declaration": {
+    "prefix": "let",
+    "body": [
+      "let ${1:name}: ${2:Type} = ${3:value};"
+    ],
+    "description": "Variable declaration"
+  },
+  "Constant Declaration": {
+    "prefix": "const",
+    "body": [
+      "const ${1:NAME}: ${2:Type} = ${3:value};"
+    ],
+    "description": "Constant declaration"
+  },
+  "Print Statement": {
+    "prefix": "print",
+    "body": [
+      "println(\"${1:message}\");"
+    ],
+    "description": "Print statement"
+  },
+  "Interface Declaration": {
+    "prefix": "interface",
+    "body": [
+      "interface ${1:InterfaceName} {",
+      "\tfn ${2:method_name}(${3:parameters}) ${4:-> ReturnType};",
+      "}"
+    ],
+    "description": "Interface declaration"
+  },
+  "Implementation Block": {
+    "prefix": "impl",
+    "body": [
+      "impl ${1:Type} {",
+      "\tfn ${2:method_name}(${3:parameters}) ${4:-> ReturnType} {",
+      "\t\t${5:// method body}",
+      "\t}",
+      "}"
+    ],
+    "description": "Implementation block"
+  },
+  "Interface Implementation": {
+    "prefix": "implfor",
+    "body": [
+      "impl ${1:InterfaceName} for ${2:Type} {",
+      "\tfn ${3:method_name}(${4:parameters}) ${5:-> ReturnType} {",
+      "\t\t${6:// method body}",
+      "\t}",
+      "}"
+    ],
+    "description": "Interface implementation"
+  }
+} 

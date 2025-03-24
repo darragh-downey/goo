@@ -1,0 +1,48 @@
+// hello.goo - A simple Hello World program in Goo
+
+// Import the standard library
+import std;
+import std.io;
+
+// Main function is the entry point
+fn main() {
+    // Print a greeting
+    println("Hello, Goo World!");
+    
+    // Variables are declared with let
+    let name: string = "Developer";
+    println("Hello, " + name + "!");
+    
+    // Function calls
+    greet("Language Server Protocol");
+    
+    // Return success
+    return 0;
+}
+
+// A simple greeting function
+fn greet(subject: string) {
+    println("Welcome to Goo, " + subject + "!");
+}
+
+// An example struct
+struct Person {
+    name: string,
+    age: i32,
+}
+
+// Method implementation for the Person struct
+impl Person {
+    // Constructor method
+    fn new(name: string, age: i32) -> Person {
+        return Person{
+            name: name,
+            age: age,
+        };
+    }
+    
+    // Method to print a greeting
+    fn say_hello(self) {
+        println("Hello, my name is " + self.name + " and I am " + to_string(self.age) + " years old!");
+    }
+} 

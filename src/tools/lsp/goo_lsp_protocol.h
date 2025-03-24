@@ -1,0 +1,174 @@
+/**
+ * @file goo_lsp_protocol.h
+ * @brief Language Server Protocol definitions for the Goo language
+ *
+ * This file contains constants and definitions for the Language Server Protocol
+ * as specified in the LSP specification.
+ *
+ * @copyright Copyright (c) 2023, Goo Language Authors
+ * @license MIT
+ */
+
+#ifndef GOO_LSP_PROTOCOL_H
+#define GOO_LSP_PROTOCOL_H
+
+/**
+ * @brief LSP message types
+ */
+typedef enum {
+    LSP_REQUEST,
+    LSP_RESPONSE,
+    LSP_NOTIFICATION,
+    LSP_RESPONSE_ERROR
+} LspMessageType;
+
+/**
+ * @brief LSP error codes
+ */
+typedef enum {
+    // JSON RPC errors
+    LSP_ERROR_PARSE_ERROR = -32700,
+    LSP_ERROR_INVALID_REQUEST = -32600,
+    LSP_ERROR_METHOD_NOT_FOUND = -32601,
+    LSP_ERROR_INVALID_PARAMS = -32602,
+    LSP_ERROR_INTERNAL_ERROR = -32603,
+    
+    // LSP specific errors
+    LSP_ERROR_SERVER_NOT_INITIALIZED = -32002,
+    LSP_ERROR_UNKNOWN_ERROR_CODE = -32001,
+    
+    // LSP request cancelled
+    LSP_ERROR_REQUEST_CANCELLED = -32800,
+    
+    // LSP content modified (for document sync)
+    LSP_ERROR_CONTENT_MODIFIED = -32801
+} LspErrorCode;
+
+/**
+ * @brief LSP text document sync kind
+ */
+typedef enum {
+    LSP_TEXT_DOCUMENT_SYNC_NONE = 0,
+    LSP_TEXT_DOCUMENT_SYNC_FULL = 1,
+    LSP_TEXT_DOCUMENT_SYNC_INCREMENTAL = 2
+} LspTextDocumentSyncKind;
+
+/**
+ * @brief LSP text document save options
+ */
+typedef enum {
+    LSP_SAVE_INCLUDE_TEXT = 1
+} LspSaveOptions;
+
+/**
+ * @brief LSP completion item kind
+ */
+typedef enum {
+    LSP_COMPLETION_ITEM_KIND_TEXT = 1,
+    LSP_COMPLETION_ITEM_KIND_METHOD = 2,
+    LSP_COMPLETION_ITEM_KIND_FUNCTION = 3,
+    LSP_COMPLETION_ITEM_KIND_CONSTRUCTOR = 4,
+    LSP_COMPLETION_ITEM_KIND_FIELD = 5,
+    LSP_COMPLETION_ITEM_KIND_VARIABLE = 6,
+    LSP_COMPLETION_ITEM_KIND_CLASS = 7,
+    LSP_COMPLETION_ITEM_KIND_INTERFACE = 8,
+    LSP_COMPLETION_ITEM_KIND_MODULE = 9,
+    LSP_COMPLETION_ITEM_KIND_PROPERTY = 10,
+    LSP_COMPLETION_ITEM_KIND_UNIT = 11,
+    LSP_COMPLETION_ITEM_KIND_VALUE = 12,
+    LSP_COMPLETION_ITEM_KIND_ENUM = 13,
+    LSP_COMPLETION_ITEM_KIND_KEYWORD = 14,
+    LSP_COMPLETION_ITEM_KIND_SNIPPET = 15,
+    LSP_COMPLETION_ITEM_KIND_COLOR = 16,
+    LSP_COMPLETION_ITEM_KIND_FILE = 17,
+    LSP_COMPLETION_ITEM_KIND_REFERENCE = 18,
+    LSP_COMPLETION_ITEM_KIND_FOLDER = 19,
+    LSP_COMPLETION_ITEM_KIND_ENUM_MEMBER = 20,
+    LSP_COMPLETION_ITEM_KIND_CONSTANT = 21,
+    LSP_COMPLETION_ITEM_KIND_STRUCT = 22,
+    LSP_COMPLETION_ITEM_KIND_EVENT = 23,
+    LSP_COMPLETION_ITEM_KIND_OPERATOR = 24,
+    LSP_COMPLETION_ITEM_KIND_TYPE_PARAMETER = 25
+} LspCompletionItemKind;
+
+/**
+ * @brief LSP symbol kind
+ */
+typedef enum {
+    LSP_SYMBOL_KIND_FILE = 1,
+    LSP_SYMBOL_KIND_MODULE = 2,
+    LSP_SYMBOL_KIND_NAMESPACE = 3,
+    LSP_SYMBOL_KIND_PACKAGE = 4,
+    LSP_SYMBOL_KIND_CLASS = 5,
+    LSP_SYMBOL_KIND_METHOD = 6,
+    LSP_SYMBOL_KIND_PROPERTY = 7,
+    LSP_SYMBOL_KIND_FIELD = 8,
+    LSP_SYMBOL_KIND_CONSTRUCTOR = 9,
+    LSP_SYMBOL_KIND_ENUM = 10,
+    LSP_SYMBOL_KIND_INTERFACE = 11,
+    LSP_SYMBOL_KIND_FUNCTION = 12,
+    LSP_SYMBOL_KIND_VARIABLE = 13,
+    LSP_SYMBOL_KIND_CONSTANT = 14,
+    LSP_SYMBOL_KIND_STRING = 15,
+    LSP_SYMBOL_KIND_NUMBER = 16,
+    LSP_SYMBOL_KIND_BOOLEAN = 17,
+    LSP_SYMBOL_KIND_ARRAY = 18,
+    LSP_SYMBOL_KIND_OBJECT = 19,
+    LSP_SYMBOL_KIND_KEY = 20,
+    LSP_SYMBOL_KIND_NULL = 21,
+    LSP_SYMBOL_KIND_ENUM_MEMBER = 22,
+    LSP_SYMBOL_KIND_STRUCT = 23,
+    LSP_SYMBOL_KIND_EVENT = 24,
+    LSP_SYMBOL_KIND_OPERATOR = 25,
+    LSP_SYMBOL_KIND_TYPE_PARAMETER = 26
+} LspSymbolKind;
+
+/**
+ * @brief LSP diagnostic severity
+ */
+typedef enum {
+    LSP_DIAGNOSTIC_SEVERITY_ERROR = 1,
+    LSP_DIAGNOSTIC_SEVERITY_WARNING = 2,
+    LSP_DIAGNOSTIC_SEVERITY_INFORMATION = 3,
+    LSP_DIAGNOSTIC_SEVERITY_HINT = 4
+} LspDiagnosticSeverity;
+
+/**
+ * @brief LSP diagnostic tags
+ */
+typedef enum {
+    LSP_DIAGNOSTIC_TAG_UNNECESSARY = 1,
+    LSP_DIAGNOSTIC_TAG_DEPRECATED = 2
+} LspDiagnosticTag;
+
+/**
+ * @brief LSP code action kind
+ */
+typedef enum {
+    LSP_CODE_ACTION_KIND_QUICKFIX = 1,
+    LSP_CODE_ACTION_KIND_REFACTOR = 2,
+    LSP_CODE_ACTION_KIND_REFACTOR_EXTRACT = 3,
+    LSP_CODE_ACTION_KIND_REFACTOR_INLINE = 4,
+    LSP_CODE_ACTION_KIND_REFACTOR_REWRITE = 5,
+    LSP_CODE_ACTION_KIND_SOURCE = 6,
+    LSP_CODE_ACTION_KIND_SOURCE_ORGANIZE_IMPORTS = 7
+} LspCodeActionKind;
+
+/**
+ * @brief LSP markup kind
+ */
+typedef enum {
+    LSP_MARKUP_KIND_PLAINTEXT = 1,
+    LSP_MARKUP_KIND_MARKDOWN = 2
+} LspMarkupKind;
+
+/**
+ * @brief LSP file change type
+ */
+typedef enum {
+    LSP_FILE_CHANGE_TYPE_CREATED = 1,
+    LSP_FILE_CHANGE_TYPE_CHANGED = 2,
+    LSP_FILE_CHANGE_TYPE_DELETED = 3
+} LspFileChangeType;
+
+#endif /* GOO_LSP_PROTOCOL_H */ 

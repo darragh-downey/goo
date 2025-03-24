@@ -1,0 +1,7 @@
+.{
+    .name = .goolexer,
+    .version = "0.1.0",
+    .dependencies = .{},
+    .paths = .{"."},
+    .fingerprint = 0x9709dc2f62e88046,
+}

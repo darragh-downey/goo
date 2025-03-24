@@ -1,0 +1,74 @@
+package main
+
+// Example demonstrating the use of parallel processing and range literals
+
+// A function that processes a single item
+func processItem(item int) int {
+    // Simulate some computation
+    result := item * item;
+    
+    // Add a delay to simulate work
+    sleep(10);  // sleep for 10ms
+    
+    return result;
+}
+
+func main() {
+    // Create a large array to process
+    var items [1000]int;
+    
+    // Initialize the array
+    for i := 0; i < 1000; i++ {
+        items[i] = i;
+    }
+    
+    // Create an array for results
+    var results [1000]int;
+    
+    // Process the array in parallel using range literals
+    // This will distribute the processing across available cores
+    go parallel [range: 0..999, shared: items, private: results] {
+        // The range variable is implicitly available
+        // and will have a different value in each parallel instance
+        results[range] = processItem(items[range]);
+    }
+    
+    // Wait for all parallel tasks to complete (implicit at the end of scope)
+    
+    // Print some results
+    for i := 0; i < 10; i++ {
+        println("Result for item ", i, ": ", results[i]);
+    }
+    
+    // Example of a more complex range
+    var matrix [100][100]int;
+    var transformed [100][100]int;
+    
+    // Initialize the matrix
+    for i := 0; i < 100; i++ {
+        for j := 0; j < 100; j++ {
+            matrix[i][j] = i * j;
+        }
+    }
+    
+    // Process a 2D range in parallel
+    go parallel [range: 0..99, 0..99, shared: matrix, private: transformed] {
+        // In this case, range is a tuple (i, j)
+        i, j := range;
+        transformed[i][j] = processMatrixElement(matrix[i][j]);
+    }
+    
+    // Print a small part of the transformed matrix
+    for i := 0; i < 5; i++ {
+        for j := 0; j < 5; j++ {
+            print(transformed[i][j], " ");
+        }
+        println();
+    }
+}
+
+// Process a matrix element
+func processMatrixElement(value int) int {
+    // Some arbitrary transformation
+    return value * 2 + 1;
+} 

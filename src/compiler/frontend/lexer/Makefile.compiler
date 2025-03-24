@@ -1,0 +1,94 @@
+# Makefile for integrating the Zig lexer with the main Goo compiler
+# Include this file from the main Makefile with 'include src/lexer/Makefile.compiler'
+
+# Configuration variables (can be overridden in the main Makefile)
+USE_ZIG_LEXER ?= 1  # Set to 0 to use Flex lexer instead
+LEXER_DEBUG ?= 0    # Set to 1 to enable debug output
+ZIG ?= zig         # Zig compiler path
+
+# Directory settings
+ZIG_LEXER_DIR = src/lexer/zig
+ZIG_LEXER_LIB = $(ZIG_LEXER_DIR)/zig-out/lib/libgoolexer.a
+ZIG_LEXER_OBJ = $(ZIG_LEXER_DIR)/zig-out/lexer.o
+ZIG_LEXER_HEADER = include/goo_lexer.h
+ZIG_INTEGRATION_OBJ = src/lexer/zig_integration.o
+
+# Flex lexer
+FLEX_LEXER_OBJ = src/generated/lexer.o
+FLEX_LEXER_SRC = src/lexer/lexer.l
+
+# Add the lexer to the compiler's object files and includes
+ifeq ($(USE_ZIG_LEXER), 1)
+  # Use Zig lexer
+  LEXER_OBJS = $(ZIG_LEXER_OBJ) $(ZIG_INTEGRATION_OBJ)
+  LEXER_CFLAGS = -DUSE_ZIG_LEXER=1
+  LEXER_DEPS = $(ZIG_LEXER_LIB) $(ZIG_LEXER_HEADER)
+else
+  # Use Flex lexer
+  LEXER_OBJS = $(FLEX_LEXER_OBJ)
+  LEXER_CFLAGS = -DUSE_ZIG_LEXER=0
+  LEXER_DEPS = $(FLEX_LEXER_OBJ)
+endif
+
+# Debug settings
+ifeq ($(LEXER_DEBUG), 1)
+  LEXER_CFLAGS += -DLEXER_DEBUG=1
+endif
+
+# Targets for building the lexer
+.PHONY: lexer flex-lexer zig-lexer clean-lexer
+
+# Main lexer target
+lexer: $(LEXER_DEPS)
+
+# Zig lexer
+zig-lexer: $(ZIG_LEXER_LIB) $(ZIG_LEXER_HEADER)
+
+$(ZIG_LEXER_LIB): $(wildcard $(ZIG_LEXER_DIR)/*.zig)
+	cd $(ZIG_LEXER_DIR) && $(ZIG) build $(if $(LEXER_DEBUG),-Ddebug=true,)
+	@echo "Zig lexer built successfully"
+
+$(ZIG_LEXER_HEADER): $(ZIG_LEXER_LIB)
+	@test -d include || mkdir -p include
+	@cp -f $(ZIG_LEXER_DIR)/src/goo_lexer.h $@ || \
+	 cp -f $(ZIG_LEXER_DIR)/zig-out/include/goo_lexer.h $@ || \
+	 (echo "Error: Could not find goo_lexer.h in expected locations" && exit 1)
+
+$(ZIG_INTEGRATION_OBJ): src/lexer/zig_integration.c $(ZIG_LEXER_HEADER)
+	$(CC) $(CFLAGS) $(LEXER_CFLAGS) -c -o $@ $<
+
+# Extract object file from the static library if needed
+$(ZIG_LEXER_OBJ): $(ZIG_LEXER_LIB)
+	@mkdir -p $(dir $@)
+	@# Extract the object file from the archive if necessary
+	@# This is needed if the compiler doesn't support linking static libraries directly
+	@if [ ! -f $@ ]; then \
+		ar x $(ZIG_LEXER_LIB) --output=$(dir $@) && \
+		mv $(dir $@)/*.o $@ || \
+		ln -sf $(ZIG_LEXER_LIB) $@; \
+	fi
+
+# Flex lexer
+flex-lexer: $(FLEX_LEXER_OBJ)
+
+$(FLEX_LEXER_OBJ): src/generated/lexer.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/generated/lexer.c: $(FLEX_LEXER_SRC)
+	@mkdir -p src/generated
+	flex -o $@ $<
+
+# Clean the lexer builds
+clean-lexer:
+	@rm -f $(ZIG_LEXER_OBJ) $(ZIG_INTEGRATION_OBJ) $(FLEX_LEXER_OBJ)
+	@rm -f $(ZIG_LEXER_HEADER)
+	@cd $(ZIG_LEXER_DIR) && $(ZIG) build clean
+
+# Variables to be used in the main Makefile
+# Add these to the appropriate variables in the main Makefile:
+#
+# OBJS += $(LEXER_OBJS)
+# CFLAGS += $(LEXER_CFLAGS)
+# CLEAN_TARGETS += clean-lexer
+# 
+# And add 'lexer' as a dependency for the main compiler target 

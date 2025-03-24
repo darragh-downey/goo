@@ -1,0 +1,28 @@
+set(RUNTIME_SOURCES
+    runtime.c
+    memory.c
+    error.c
+    capability.c
+    interface.c
+    integration.c
+    goo_zig_bridge.c
+    goo_runtime.c
+    goo_distributed.c
+    goo_supervision.c
+)
+
+# Create the runtime library
+add_library(goo_runtime STATIC ${RUNTIME_SOURCES})
+
+# Include directories
+target_include_directories(goo_runtime PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}
+)
+
+# Only add the memory subdirectory since we've implemented it
+add_subdirectory(memory)
+
+# Only add the memory subdirectory since we implemented it
+add_subdirectory(memory)

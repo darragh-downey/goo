@@ -1,0 +1,144 @@
+// Example demonstrating compile-time SIMD in Goo
+package main
+
+// Define SIMD vector types and operations at compile time
+comptime simd {
+    // Define a 4-element float32 vector with 16-byte alignment
+    vector Float4 float32 aligned(16) {
+        safe;              // Safe by default (bounds checking)
+        arch = auto;       // Auto-detect best SIMD instruction set
+    };
+    
+    // Define a 4-element int32 vector
+    vector Int4 int32 aligned(16) {
+        safe;
+        arch = auto;
+    };
+    
+    // Define vector operations
+    add_f4 = add vector = Float4;
+    sub_f4 = sub vector = Float4;
+    mul_f4 = mul vector = Float4;
+    div_f4 = div vector = Float4;
+    
+    // Fused multiply-add (a*b + c in one instruction)
+    fma_f4 = fma vector = Float4 fused;
+    
+    // Masked operations that only affect elements where mask is true
+    mask_add_f4 = add vector = Float4 mask;
+    
+    // Integer vector operations
+    add_i4 = add vector = Int4;
+    mul_i4 = mul vector = Int4;
+    
+    // Set target architecture manually (optional)
+    arch = "avx2";
+    
+    // Enable runtime detection fallback for older CPUs
+    auto_detect = true;
+    allow_fallback = true;
+}
+
+// Safe vector processing
+func process_vector(a []float32, b []float32, c []float32, result []float32) {
+    // Process data in 4-element chunks
+    for i := 0; i < len(a); i += 4 {
+        // Load data into SIMD vectors
+        va := Float4.load(a[i:])
+        vb := Float4.load(b[i:])
+        vc := Float4.load(c[i:])
+        
+        // Perform vector operations (a*b + c)
+        temp := mul_f4(va, vb)
+        vresult := add_f4(temp, vc)
+        
+        // Alternatively, use fused multiply-add
+        // vresult := fma_f4(va, vb, vc)
+        
+        // Store result back to memory
+        vresult.store(result[i:])
+    }
+}
+
+// Conditional vector processing with masks
+func conditional_process(a []float32, b []float32, mask []bool, result []float32) {
+    for i := 0; i < len(a); i += 4 {
+        va := Float4.load(a[i:])
+        vb := Float4.load(b[i:])
+        vmask := Bool4.load(mask[i:])
+        
+        // Only add elements where mask is true
+        vresult := mask_add_f4(va, vb, vmask)
+        
+        vresult.store(result[i:])
+    }
+}
+
+// Using SIMD in an unsafe context for raw pointer manipulation
+unsafe func low_level_process(ptr_a *float32, ptr_b *float32, ptr_result *float32, count int) {
+    // Compile-time safety check
+    comptime {
+        if count % 4 != 0 {
+            @compile_error("Count must be a multiple of 4 for SIMD processing");
+        }
+    }
+    
+    for i := 0; i < count; i += 4 {
+        // Load aligned data directly from memory
+        va := Float4.load_aligned(ptr_a + i)
+        vb := Float4.load_aligned(ptr_b + i)
+        
+        // Process data
+        vresult := mul_f4(va, vb)
+        
+        // Store aligned result
+        vresult.store_aligned(ptr_result + i)
+    }
+}
+
+// Image processing example with SIMD
+func apply_brightness(image []float32, brightness float32, width int, height int) {
+    // Create a vector filled with the brightness value
+    brightness_vec := Float4.splat(brightness)
+    
+    for y := 0; y < height; y++ {
+        for x := 0; x < width; x += 4 {
+            // Get pixel data (R,G,B,A for 4 pixels at a time)
+            idx := y * width + x
+            pixels := Float4.load(image[idx:])
+            
+            // Multiply by brightness factor
+            pixels = mul_f4(pixels, brightness_vec)
+            
+            // Store back to image
+            pixels.store(image[idx:])
+        }
+    }
+}
+
+func main() {
+    // Allocate aligned memory for SIMD operations
+    a := alloc_aligned([]float32, 1024, 16)
+    b := alloc_aligned([]float32, 1024, 16)
+    c := alloc_aligned([]float32, 1024, 16)
+    result := alloc_aligned([]float32, 1024, 16)
+    
+    // Initialize data
+    for i := 0; i < 1024; i++ {
+        a[i] = float32(i)
+        b[i] = float32(i * 2)
+        c[i] = float32(i / 2)
+    }
+    
+    // Process using SIMD
+    process_vector(a, b, c, result)
+    
+    // Print some results
+    super "Results: ", result[0], result[4], result[8]
+    
+    // Clean up
+    free(a)
+    free(b)
+    free(c)
+    free(result)
+} 

@@ -1,0 +1,16 @@
+.{
+    .name = .goosemantic,
+    .version = "0.2.0",
+    .dependencies = .{},
+    .paths = .{
+        "include",
+        "type_checker.zig",
+        "symbol_table.zig",
+        "semantic_analyzer.zig",
+        "semantic_c_api.zig",
+        "test_semantic.zig",
+        "build.zig",
+        "build.zig.zon",
+    },
+    .fingerprint = 0xb78c4d3e67f22468,
+}

@@ -1,0 +1,38 @@
+// Example Goo program
+fn factorial(n: int) -> int {
+    if n <= 1 {
+        return 1
+    } else {
+        return n * fact(n-1);
+    }
+}
+
+fn main() {
+    let result: int = factorial(5);
+    println("Factorial of 5 is: {}" result);
+    
+    let value: int = "not an integer";
+    
+    let mut numbers = [1, 2, 3];
+    let ref1 = &numbers;
+    let ref2 = &mut numbers;
+    
+    println("First number: {}", ref1[0]);
+    println("Modified number: {}", ref2[0]);
+}
+
+// Example to demonstrate type error reporting in Goo language
+
+function add(a: int, b: int): int {
+    return a + b;
+}
+
+function main() {
+    let x = 42;
+    let y = "hello";
+    let z = add(x, y);  // Type error: string passed where int expected
+    
+    if (z) {           // Type error: condition must be boolean
+        print(z);
+    }
+} 

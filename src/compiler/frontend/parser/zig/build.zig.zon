@@ -1,0 +1,7 @@
+.{
+    .name = .gooparser,
+    .version = "0.1.0",
+    .dependencies = .{},
+    .paths = .{"."},
+    .fingerprint = 0x344e1408a03f4f76,
+}

@@ -1,0 +1,208 @@
+// Test lexer with various token types and edge cases
+
+// Comments and whitespace handling
+/* Multi-line
+   comment test */
+
+// Package declaration
+package test
+
+// Import statements
+import "fmt"
+import (
+    "os"
+    "strings"
+)
+
+// Constants
+const (
+    PI = 3.14159
+    E = 2.71828
+    DEBUG = true
+    VERSION = "1.0.0"
+)
+
+// Variables with different types
+var (
+    count int = 0
+    name string = "test"
+    flag bool = false
+    rate float = 0.01
+)
+
+// Function with various parameter and return types
+fn calculate(x int, y float, enabled bool) (float, error) {
+    if !enabled {
+        return 0.0, errors.New("calculation disabled")
+    }
+    
+    result := float(x) * y * (PI / E)
+    if result > 100.0 {
+        result = 100.0
+    }
+    
+    return result, nil
+}
+
+// Struct definition with embedded fields
+struct Point {
+    x, y float
+    
+    // Embedded struct
+    struct {
+        color string
+        visible bool
+    }
+}
+
+// Interface definition
+interface Drawable {
+    draw(scale float)
+    getPosition() (float, float)
+}
+
+// Method implementation
+fn (p Point) getPosition() (float, float) {
+    return p.x, p.y
+}
+
+// Complex function with control structures and literals
+fn processData(values []int, factor float) map[string]float {
+    results := make(map[string]float)
+    
+    // Range loop
+    for i, v := range values {
+        // String formatting and concatenation
+        key := fmt.Sprintf("item_%d", i)
+        
+        // Switch statement
+        switch {
+            case v < 0:
+                results[key] = float(v) * -1.0 * factor
+            case v == 0:
+                results[key] = 0.0
+            case v > 100:
+                results[key] = 100.0 * factor
+            default:
+                results[key] = float(v) * factor
+        }
+        
+        // Increment with shorthand
+        count++
+    }
+    
+    // String literals with escape sequences
+    logMessage := "Processed \"data\" with \n special chars"
+    fmt.Println(logMessage)
+    
+    // Test raw string literals
+    pattern := `\d+(\.\d+)?`
+    fmt.Println(pattern)
+    
+    // Character literals
+    ch := 'A'
+    
+    // Various number formats
+    values = append(values, 0xFF)  // hex
+    values = append(values, 0b1010) // binary
+    values = append(values, 0o755) // octal
+    values = append(values, 1_000_000) // with underscores
+    
+    // Test range literals
+    for i := range 1..10 {
+        fmt.Println(i)
+    }
+    
+    return results
+}
+
+// Main function
+fn main() {
+    // Array literal
+    numbers := [1, 2, 3, 4, 5]
+    
+    // Slice and append
+    moreNumbers := []int{6, 7, 8}
+    numbers = append(numbers, moreNumbers...)
+    
+    // Map literal
+    config := map[string]string{
+        "host": "localhost",
+        "port": "8080",
+    }
+    
+    // Function call with named arguments
+    result, err := calculate(
+        x: 10,
+        y: 5.5,
+        enabled: true,
+    )
+    
+    // Error handling
+    if err != nil {
+        fmt.Println("Error:", err)
+        return
+    }
+    
+    // Print the result
+    fmt.Printf("Result: %.2f\n", result)
+    
+    // Create struct with initialization
+    point := Point{
+        x: 10.5,
+        y: 20.3,
+        color: "red",
+        visible: true,
+    }
+    
+    // Test nested function literals
+    processor := fn(data []int) {
+        transformer := fn(value int) int {
+            return value * 2
+        }
+        
+        for i, v := range data {
+            data[i] = transformer(v)
+        }
+    }
+    
+    // Call the processor
+    processor(numbers)
+    
+    // Print out values
+    for _, n := range numbers {
+        fmt.Println(n)
+    }
+    
+    // Test various operators
+    a, b := 10, 20
+    fmt.Println(a + b)
+    fmt.Println(a - b)
+    fmt.Println(a * b)
+    fmt.Println(a / b)
+    fmt.Println(a % b)
+    fmt.Println(a << 2)
+    fmt.Println(a >> 1)
+    fmt.Println(a & b)
+    fmt.Println(a | b)
+    fmt.Println(a ^ b)
+    fmt.Println(a && b > 0)
+    fmt.Println(a || b < 0)
+    fmt.Println(!false)
+    
+    // Assignment operators
+    a += 5
+    b -= 3
+    a *= 2
+    b /= 4
+    
+    // Comparison
+    fmt.Println(a == b)
+    fmt.Println(a != b)
+    fmt.Println(a < b)
+    fmt.Println(a <= b)
+    fmt.Println(a > b)
+    fmt.Println(a >= b)
+    
+    fmt.Println("Test completed")
+} 

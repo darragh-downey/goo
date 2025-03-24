@@ -1,0 +1,127 @@
+# Makefile.integration - Build and run tests for comparing lexer implementations
+# 
+# This makefile builds the test programs for the unified lexer selection interface
+# and provides targets for running various integration tests.
+
+CC := gcc
+CFLAGS := -I../.. -Wall -Wextra -g
+ZIG := zig
+ZIG_FLAGS := cc -target native -I../..
+
+# Output files
+SELECTION_TEST := test_lexer_selection
+INTEGRATION_TEST := test_lexer_integration
+COMPILER_TEST := compiler_integration_test
+
+# Flex lexer
+FLEX_SRCS := lexer.c yystype.c lex_support.c
+FLEX_OBJS := $(FLEX_SRCS:.c=.o)
+
+# Zig lexer
+ZIG_DIR := zig
+ZIG_SRC := $(ZIG_DIR)/src/main.zig
+ZIG_LIB := $(ZIG_DIR)/zig-out/lib/libgoo_lexer.a
+ZIG_INCLUDE := $(ZIG_DIR)/include
+
+# Common files
+SELECTION_SRCS := lexer_selection.c
+SELECTION_OBJS := $(SELECTION_SRCS:.c=.o)
+
+# Test files
+TEST_SELECTION_SRC := test_lexer_selection.c
+TEST_INTEGRATION_SRC := test_lexer_integration.c
+COMPILER_TEST_SRC := compiler_integration_test.c
+
+# Common headers
+COMMON_HEADERS := token_definitions.h lexer_selection.h
+
+# Default target
+all: flex-only
+
+# Targets for different builds
+flex-only: CFLAGS += -DUSE_FLEX_LEXER
+flex-only: setup $(SELECTION_TEST)
+
+zig-only: CFLAGS += -DUSE_ZIG_LEXER -I$(ZIG_DIR)/include
+zig-only: setup $(SELECTION_TEST)
+
+# Build the Zig lexer library
+$(ZIG_LIB): $(ZIG_SRC)
+	cd $(ZIG_DIR) && $(ZIG) build
+
+# Build lexer selection library
+$(SELECTION_OBJS): %.o: %.c $(COMMON_HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Build Flex lexer objects
+$(FLEX_OBJS): %.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Build lexer selection test (Flex only version)
+$(SELECTION_TEST): $(TEST_SELECTION_SRC) $(SELECTION_OBJS) $(FLEX_OBJS) $(COMMON_HEADERS)
+	$(CC) $(CFLAGS) $(TEST_SELECTION_SRC) $(SELECTION_OBJS) $(FLEX_OBJS) -o $@
+
+# Build lexer integration test
+$(INTEGRATION_TEST): $(TEST_INTEGRATION_SRC) $(ZIG_LIB)
+	$(CC) $(CFLAGS) -I$(ZIG_INCLUDE) $< $(ZIG_LIB) -o $@
+
+# Build compiler integration test
+$(COMPILER_TEST): $(COMPILER_TEST_SRC) $(SELECTION_OBJS) $(FLEX_OBJS)
+	$(CC) $(CFLAGS) $^ -o $@
+
+# Run tests
+run-test-selection: $(SELECTION_TEST)
+	./$(SELECTION_TEST) --help
+
+run-test-integration: $(INTEGRATION_TEST)
+	./$(INTEGRATION_TEST) --help
+
+run-compiler-test: $(COMPILER_TEST)
+	./$(COMPILER_TEST) --help
+
+# Run full test suite with all available scripts
+run-full-test-suite: flex-only
+	@echo "Running basic lexer tests..."
+	./run_lexer_tests.sh
+	@echo "Running compiler test suite comparison..."
+	./compare_compiler_lexers.sh ../../test/
+	@echo "Running full integration test (if compiler is available)..."
+	if [ -f ../../bin/goo ]; then ./full_integration_test.sh; else echo "Compiler not found, skipping full integration test"; fi
+
+# Generate test files
+sample_files: test-dirs
+	@echo "Creating sample test files..."
+	@echo "let x = 123;" > test_files/test_simple.goo
+	@echo "let s = \"test string\";" >> test_files/test_simple.goo
+	@echo "fn test() { return x + 1; }" >> test_files/test_simple.goo
+
+# Create test directories
+test-dirs:
+	@echo "Creating test directories..."
+	mkdir -p test_files
+	mkdir -p test_output
+	mkdir -p test_results
+	mkdir -p compiler_test_results
+	mkdir -p integration_results
+
+# Make scripts executable
+scripts-executable:
+	chmod +x run_lexer_tests.sh
+	chmod +x test_single_file.sh
+	chmod +x compare_compiler_lexers.sh
+	chmod +x full_integration_test.sh
+
+# Setup everything for testing
+setup: test-dirs sample_files scripts-executable
+
+# Clean everything
+clean:
+	rm -f $(SELECTION_TEST) $(INTEGRATION_TEST) $(COMPILER_TEST)
+	rm -f *.o
+	rm -rf test_output
+	rm -rf test_results
+	rm -rf compiler_test_results
+	rm -rf integration_results
+	rm -rf test_files
+
+.PHONY: all flex-only zig-only clean test-dirs sample_files scripts-executable setup run-test-selection run-test-integration run-compiler-test run-full-test-suite 

@@ -1,0 +1,5 @@
+{
+    "goo.lsp.path": "/Users/darraghdowney/Workspace/github.com/goo/bin/goo-lsp",
+    "goo.lsp.args": ["--verbose"],
+    "goo.lsp.trace.server": "verbose"
+} 

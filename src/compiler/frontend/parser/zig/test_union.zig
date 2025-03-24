@@ -1,0 +1,1 @@
+const std = @import("std"); pub fn main() !void { std.debug.print("Testing union initialization\n", .{}); const MyUnion = union(enum) { int: i32, float: f64, str: []const u8, }; const a = MyUnion{ .int = 42 }; std.debug.print("Union: {}\n", .{a}); }

@@ -1,0 +1,20 @@
+.{
+    .name = goo_diagnostics,
+    .version = "0.1.0",
+
+    .dependencies = .{
+        // No external dependencies currently
+    },
+
+    .paths = .{
+        // Include all files in the package directory
+        "build.zig",
+        "build.zig.zon",
+        "*.c",
+        "*.h",
+        "*.zig",
+        "*.json",
+        "README.md",
+        "Makefile",
+    },
+}

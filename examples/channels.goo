@@ -1,0 +1,32 @@
+package main
+
+func main() {
+    var ch chan<int>
+    var resultCh chan<int>
+    
+    // Launch a goroutine
+    go worker(ch, resultCh)
+    
+    // Send a value to the worker
+    <-ch = 42
+    
+    // Receive the result
+    var result int = <-resultCh
+    super result
+    
+    // Demonstrate parallel execution
+    go parallel {
+        super "Running in parallel!"
+    }
+}
+
+func worker(in chan<int>, out chan<int>) {
+    // Receive a value
+    var x int = <-in
+    
+    // Process it
+    var result int = x * 2
+    
+    // Send the result back
+    <-out = result
+} 

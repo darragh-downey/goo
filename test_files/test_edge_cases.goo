@@ -1,0 +1,138 @@
+// Edge cases and potential error scenarios for lexer testing
+
+// Extreme number values
+const (
+    // Very large and small numbers
+    LARGE_INT = 9223372036854775807  // max int64
+    SMALL_INT = -9223372036854775808 // min int64
+    MAX_UINT = 18446744073709551615  // max uint64
+    
+    // Float edge cases
+    TINY_FLOAT = 1.0e-323        // near smallest positive float64
+    HUGE_FLOAT = 1.7976931348623157e+308 // near max float64
+    INF_APPROX = 1.8e+308        // should overflow to infinity
+    NAN_VAL = 0.0 / 0.0          // NaN expression
+    
+    // Number format variations
+    HEX_VARIATIONS = 0xABCDEF
+    HEX_LOWER = 0xabcdef
+    BIN_EXTREME = 0b1111111111111111111111111111111111111111111111111111111111111111
+    OCT_EXTREME = 0o7777777777777777777777
+    
+    // Numbers with underscores
+    READABLE_INT = 1_000_000_000_000
+    READABLE_FLOAT = 1_234_567.890_123
+    WEIRD_UNDERSCORES = 1_2_3_4_5.6_7_8_9
+    HEX_UNDERSCORES = 0xFFFF_FFFF_FFFF
+)
+
+// String and character edge cases
+const (
+    // Escape sequences
+    ESCAPES = "\\n\\t\\r\\\"\\'\\\\"
+    
+    // Unicode escapes
+    UNICODE = "\u0000\u00A9\uD834\uDD1E\U0001F44D"
+    
+    // Multi-line strings
+    MULTILINE = "Line 1
+Line 2
+Line 3"
+    
+    // Empty strings
+    EMPTY = ""
+    
+    // Special chars
+    SPECIALS = "!@#$%^&*()_+{}[]|:;'<>,.?/"
+    
+    // Raw strings with special chars
+    RAW_SPECIAL = `\n\t\r\'\"\\$%^&*()`
+    
+    // Very long string
+    LONG_STRING = "This is a very long string that goes on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on and on"
+)
+
+// Identifier edge cases
+var (
+    _ = 10                // Blank identifier
+    a1 = 1                // Alphanumeric
+    THIS_IS_VALID = 2     // Uppercase with underscores  
+    αβγ = 3               // Unicode identifiers
+    __private = 4         // Double underscore
+    $_mixed_$ = 5         // Mixed with special chars
+    verylongidentifierthatgoesontoensurelexerhandleslongidentifiersproperly = 6
+)
+
+// Comment edge cases
+// Comment at the end of file with no newline
+
+/* Nested /* comments */ might cause issues */
+
+/*
+ * Multi-line
+ * formatted
+ * comment
+ */
+
+/*/
+Unusual comment format
+/*/
+
+// Keywords as identifiers in different contexts
+var for = 10      // Using keyword as variable (should be error)
+var if = 20       // Another keyword (should be error)
+var return = 30   // Another keyword (should be error)
+
+// Unusual spacing and formatting
+var  multiple    spaces=10
+
+fn   oddlyFormatted   (   x    int  ,  y   float   )    {
+    return       x+
+    y
+}
+
+// Unusual token combinations
+var x = 2+++3  // Multiple operators
+var y = 5---2  // Multiple operators
+var z = !!!true // Multiple operators
+
+// Range literals
+var r1 = 1..10
+var r2 = -5..+5
+var r3 = 0..0
+var r4 = a..b  // Identifiers in range
+
+// Malformed tokens (should produce errors)
+var invalid_hex = 0xGZ
+var invalid_bin = 0b12
+var invalid_oct = 0o9
+var unterminated_string = "This string has no end
+
+var unterminated_comment = /* This comment has no end
+
+var invalid_float = 1.2.3
+var invalid_char = 'too long'
+var empty_char = ''
+
+// Unusual semicolon placement
+var a = 1;;;;
+var b = 2;var c = 3;var d = 4;
+
+// Unicode edge cases in strings
+var unicode_str = "你好, 世界! Привет, мир! こんにちは世界! مرحبا بالعالم! 안녕하세요, 세계!"
+
+// Functions with unusual parameter/return combinations
+fn noParams() {}
+fn manyParams(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p int) {}
+fn manyReturns() (int, string, bool, float, error, []byte, map[string]int, *struct{}, interface{}) {}
+fn variadicParams(args ...int) {}
+
+// Error test: unterminated block
+fn unfinishedBlock() {
+    if true {
+        for i := 0; i < 10; i++ {
+            switch i {
+                case 1:
+                    if i == 1 {
+                        // Missing closing braces
+} 

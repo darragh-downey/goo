@@ -1,0 +1,58 @@
+// Sample Goo file for testing lexer
+package main
+
+import "fmt"
+
+func main() {
+    // Variable declarations with different types
+    var x int = 42
+    var y float64 = 3.14159
+    var z bool = true
+    var s string = "Hello, Goo!"
+    
+    // Control structures
+    if x > 40 && z {
+        fmt.println(s)
+        x = x + 10
+    } else {
+        fmt.println("Condition not met")
+    }
+    
+    // For loop
+    for i := 0; i < 5; i = i + 1 {
+        fmt.println(i)
+    }
+    
+    // Function call
+    test_func(x, y)
+    
+    // Channels
+    var ch chan int
+    ch <- 5  // Send
+    var v = <- ch  // Receive
+    
+    // Concurrency
+    go func() {
+        fmt.println("Concurrent execution")
+    }()
+    
+    // Advanced features
+    comptime {
+        fmt.println("Compile-time execution")
+    }
+    
+    // Safety annotations
+    safe {
+        // Memory-safe operations
+        var safe_arr [10]int
+    }
+    
+    unsafe {
+        // Potentially unsafe operations
+        var ptr *int = &x
+    }
+}
+
+func test_func(a int, b float64) float64 {
+    return a * b
+} 

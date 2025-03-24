@@ -1,0 +1,128 @@
+// JIT and Interpreter Example
+// This program demonstrates features that work well with JIT and interpretation:
+// - Fast computation
+// - Dynamic code behavior
+// - Runtime type checks
+
+import "std/io"
+import "std/math"
+import "std/time"
+
+// This function calculates prime numbers using the Sieve of Eratosthenes
+func calculate_primes(limit int) []int {
+    // Create a boolean array for the sieve
+    sieve := make([]bool, limit + 1)
+    
+    // Initialize all entries as potentially prime
+    for i := 2; i <= limit; i++ {
+        sieve[i] = true
+    }
+    
+    // Mark non-primes using Sieve of Eratosthenes
+    for p := 2; p*p <= limit; p++ {
+        // If p is prime, mark all its multiples
+        if sieve[p] {
+            for i := p*p; i <= limit; i += p {
+                sieve[i] = false
+            }
+        }
+    }
+    
+    // Count primes to allocate array
+    count := 0
+    for i := 2; i <= limit; i++ {
+        if sieve[i] {
+            count++
+        }
+    }
+    
+    // Create result array
+    primes := make([]int, count)
+    
+    // Fill result array
+    idx := 0
+    for i := 2; i <= limit; i++ {
+        if sieve[i] {
+            primes[idx] = i
+            idx++
+        }
+    }
+    
+    return primes
+}
+
+// Dynamic behavior function that benefits from JIT
+func dynamic_calculation(x int, op string, y int) int {
+    switch op {
+        case "+": return x + y
+        case "-": return x - y
+        case "*": return x * y
+        case "/": 
+            if y == 0 {
+                panic("Division by zero")
+            }
+            return x / y
+        case "^": return math.pow(x, y)
+        case "%": return x % y
+        default:
+            panic("Unknown operator: " + op)
+    }
+}
+
+// Function to time the execution of a function
+func time_execution(name string, f func()) {
+    start := time.now()
+    f()
+    duration := time.since(start)
+    io.printf("Execution of %s took %d ms\n", name, duration.milliseconds())
+}
+
+func main() {
+    io.println("JIT and Interpreter Example")
+    io.println("===========================")
+    
+    // This will be much faster in JIT mode compared to interpretation
+    io.println("\nCalculating prime numbers up to 100000...")
+    time_execution("calculate_primes", func() {
+        primes := calculate_primes(100000)
+        io.printf("Found %d prime numbers\n", len(primes))
+        io.printf("First 10 primes: ")
+        for i := 0; i < 10; i++ {
+            io.printf("%d ", primes[i])
+        }
+        io.println()
+    })
+    
+    // Dynamic behavior that benefits from JIT's specialization
+    io.println("\nPerforming dynamic calculations...")
+    time_execution("dynamic_calculations", func() {
+        operators := ["+", "-", "*", "/", "^", "%"]
+        for i := 0; i < 1000; i++ {
+            x := i % 100
+            y := (i % 10) + 1  // Avoid division by zero
+            op := operators[i % len(operators)]
+            result := dynamic_calculation(x, op, y)
+            if i < 10 {
+                io.printf("%d %s %d = %d\n", x, op, y, result)
+            }
+        }
+    })
+    
+    // Demonstrate error handling which works in both modes
+    io.println("\nDemonstrating error handling...")
+    func() {
+        // Use recover to handle the error
+        defer func() {
+            if err := recover(); err != nil {
+                io.printf("Recovered from error: %v\n", err)
+            }
+        }()
+        
+        // This will cause a panic
+        io.println("Attempting division by zero...")
+        dynamic_calculation(10, "/", 0)
+        io.println("This line should not be reached")
+    }()
+    
+    io.println("\nProgram completed successfully")
+} 

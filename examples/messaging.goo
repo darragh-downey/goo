@@ -1,0 +1,60 @@
+package main
+
+func main() {
+    // Publisher-Subscriber pattern
+    var publisher pub chan<int>
+    var subscriber sub chan<int>
+    
+    // Push-Pull pattern (work distribution)
+    var producer push chan<int>
+    var consumer pull chan<int>
+    
+    // Request-Reply pattern (client-server)
+    var client req chan<string>
+    var server rep chan<string> @ "tcp://*:5555"
+    
+    // Launch workers
+    go publisherTask(publisher)
+    go subscriberTask(subscriber)
+    go producerTask(producer)
+    go consumerTask(consumer)
+    go clientTask(client)
+    go serverTask(server)
+    
+    super "All messaging patterns started"
+}
+
+// Publisher-Subscriber pattern
+func publisherTask(pub pub chan<int>) {
+    <-pub = 100  // Publish to all subscribers
+    super "Published value"
+}
+
+func subscriberTask(sub sub chan<int>) {
+    var value int = <-sub  // Receive from any publisher
+    super value
+}
+
+// Push-Pull pattern
+func producerTask(push push chan<int>) {
+    <-push = 42  // Distribute work
+    super "Pushed work item"
+}
+
+func consumerTask(pull pull chan<int>) {
+    var work int = <-pull  // Receive work
+    super work
+}
+
+// Request-Reply pattern
+func clientTask(req req chan<string>) {
+    <-req = "Hello"  // Send request
+    var response string = <-req  // Wait for reply
+    super response
+}
+
+func serverTask(rep rep chan<string>) {
+    var request string = <-rep  // Receive request
+    <-rep = "World"  // Send reply
+    super "Replied to request"
+} 

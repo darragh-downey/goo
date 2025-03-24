@@ -1,0 +1,118 @@
+package main
+
+// This example demonstrates Goo's allocator support and safety-by-default features
+
+// Define a custom arena allocator
+allocator pageAllocator arena {
+    // Configuration options can go here
+    pageSize: 4096,
+    maxPages: 100
+}
+
+// Define a pool allocator for fixed-size objects
+allocator userPool pool {
+    objectSize: 256,
+    capacity: 1000
+}
+
+// Define a function that takes an allocator as a parameter
+func processData(data []int, allocator myAlloc) []int {
+    // Allocate memory using the provided allocator
+    var results []int = alloc []int[len(data)] [allocator: myAlloc]
+    
+    // Process the data (just double each value in this example)
+    for i := 0; i < len(data); i++ {
+        results[i] = data[i] * 2
+    }
+    
+    return results
+}
+
+// Main function
+func main() {
+    // Allocate an array using the page allocator
+    var data []int = alloc []int[1000] [allocator: pageAllocator]
+    
+    // Initialize the array
+    for i := 0; i < 1000; i++ {
+        data[i] = i
+    }
+    
+    // Process the data using the page allocator
+    var results = processData(data, pageAllocator)
+    
+    // Print some results
+    for i := 0; i < 10; i++ {
+        println("Result", i, ":", results[i])
+    }
+    
+    // Manually free the memory (though Goo will automatically free it when it goes out of scope)
+    free data [allocator: pageAllocator]
+    free results [allocator: pageAllocator]
+    
+    // Example of using a scope with an allocator
+    scope (pageAllocator) {
+        // All allocations in this scope use the pageAllocator
+        var tempData []int = alloc []int[500]
+        
+        // Initialize the data
+        for i := 0; i < 500; i++ {
+            tempData[i] = i * i
+        }
+        
+        // No need to free tempData - it's automatically freed when the scope ends
+    }
+    
+    // User objects with pool allocator
+    scope (userPool) {
+        // Create user objects using the pool allocator
+        var users []User = alloc []User[10]
+        
+        // Initialize users
+        for i := 0; i < 10; i++ {
+            users[i] = User{
+                id: i,
+                name: "User " + toString(i),
+                active: true
+            }
+        }
+        
+        // All users are automatically freed when this scope ends
+    }
+    
+    // Safety is enforced by default
+    var numbers []int = alloc []int[5]
+    
+    // This is safe because bounds checking is enabled by default
+    for i := 0; i < 5; i++ {
+        numbers[i] = i * 10
+    }
+    
+    // This would trigger a runtime error because of out-of-bounds access
+    // numbers[10] = 100
+    
+    // To bypass safety checks, we'd need to use an unsafe block
+    unsafe {
+        // This bypasses safety checks - use with caution!
+        var ptr *int = (*int)(&numbers[0])
+        ptr[3] = 42  // Directly modifying memory
+    }
+    
+    // Working with strings safely
+    var message string = "Hello, Goo!"
+    
+    // String processing is safe by default
+    var length int = len(message)
+    var firstChar rune = message[0]
+    
+    println("Message:", message)
+    println("Length:", length)
+    println("First character:", string(firstChar))
+}
+
+// User struct for the pool allocator example
+type User struct {
+    id int
+    name string
+    active bool
+} 
