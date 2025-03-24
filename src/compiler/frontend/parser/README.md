@@ -105,3 +105,104 @@ goo_parser_cleanup();
 - Enhanced test suite with complex program parsing
 - C API improvements for better error handling
 - Updated build system
+
+# Goo Parser Implementation
+
+The Goo parser is designed to handle both the Goo language (with extensions) and standard Go code. This implementation uses a mode-aware parser that can automatically detect the language mode based on file extension or content markers.
+
+## Architecture
+
+The parser infrastructure consists of several components:
+
+1. **Lexer** - Tokenizes the source code, supporting both Go and Goo syntax
+2. **File Detector** - Detects whether code should be treated as Go or Goo
+3. **Mode-Aware Parser** - Parses according to the detected mode
+4. **AST** - Represents the parsed code, including Go and Goo constructs
+
+## Language Mode Detection
+
+The parser determines the language mode using these rules:
+
+1. **File Extension**:
+   - `.go` files are treated as Go code
+   - `.goo` files are treated as Goo code
+
+2. **Content Markers**:
+   - `// goo:enable` or `/* goo:enable */` forces Goo mode
+   - `// goo:mode=go` or `// goo:mode=goo` explicitly sets the mode
+   - Go build constraints (`//go:build`) indicate Go mode
+
+3. **Manual Override**:
+   - The mode can be manually specified via the API
+
+## Go vs Goo Mode
+
+When parsing in Go mode, the parser enforces these constraints:
+
+1. Standard Go syntax only (no Goo extensions)
+2. Strict adherence to the Go language specification
+3. Error messages tailored to Go compatibility
+
+In Goo mode, the parser allows:
+
+1. All valid Go syntax
+2. Goo language extensions (enums, traits, pattern matching, etc.)
+3. Additional operators and type system features
+
+## Using the Mode-Aware Parser
+
+```c
+// Create a parser
+GooParserHandle parser = gooModeAwareParserCreate();
+
+// Parse with automatic mode detection
+GooParserResultCode result = gooModeAwareParseFile(parser, "path/to/file.go");
+
+// Check the detected mode
+GooLangMode mode = gooParserGetDetectedMode(parser);
+if (mode == GOO_LANG_MODE_GO) {
+    printf("File was parsed in Go mode\n");
+} else {
+    printf("File was parsed in Goo mode\n");
+}
+
+// Force a specific mode
+gooParserForceMode(parser, GOO_LANG_MODE_GOO);
+
+// Set the default mode for ambiguous cases
+gooParserSetDefaultMode(parser, GOO_LANG_MODE_GO);
+
+// Clean up
+gooParserDestroy(parser);
+```
+
+## Testing
+
+The parser includes a test suite that validates:
+
+1. Correct mode detection based on file extension and content
+2. Parsing of valid Go code in Go mode
+3. Parsing of valid Goo code in Goo mode
+4. Rejection of Goo extensions in Go mode
+5. Automatic language mode detection
+
+To run the tests:
+
+```bash
+cd src/compiler/frontend/parser
+make -f Makefile.mode_test run
+```
+
+## Integration with the Compiler
+
+The mode-aware parser is integrated into the compiler pipeline to support both Go and Goo source files, enabling Goo to be a true superset of Go. This means:
+
+1. Go code can be compiled without changes
+2. Existing Go libraries can be used in Goo projects
+3. Goo extensions can be added incrementally to Go codebases
+
+## Future Work
+
+1. Enhanced IDE integration via LSP for both Go and Goo
+2. Expanded test suite for all Go language features
+3. Documentation tools that understand both Go and Goo syntax

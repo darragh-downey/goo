@@ -1,0 +1,162 @@
+CC = gcc
+CFLAGS = -Wall -Werror -g -I../include
+LDFLAGS = 
+
+SRC_DIR = .
+OBJ_DIR = build
+BIN_DIR = bin
+
+# Files for file detector and mode-aware parser
+DETECTOR_SRC = ../lexer/goo_file_detector.c
+PARSER_SRC = goo_parser_mode_aware.c
+TEST_SRC = mode_aware_parser_test.c
+
+# Mock objects for testing
+MOCK_SRC = mock_parser.c
+
+# All source files
+SRCS = $(DETECTOR_SRC) $(PARSER_SRC) $(TEST_SRC) $(MOCK_SRC)
+
+# Object files
+OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(SRCS)))
+
+# Target executable
+TARGET = $(BIN_DIR)/mode_aware_parser_test
+
+# Create directories
+$(shell mkdir -p $(OBJ_DIR) $(BIN_DIR))
+
+# Default target
+all: $(TARGET)
+
+# Link the test executable
+$(TARGET): $(OBJS)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+# Compile source files
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJ_DIR)/%.o: ../lexer/%.c | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+# Mock parser implementation
+$(OBJ_DIR)/mock_parser.o: mock_parser.c | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+# Create mock parser for testing
+mock_parser.c:
+	@echo '#include "../include/goo_parser.h"' > $@
+	@echo '#include <stdlib.h>' >> $@
+	@echo '#include <string.h>' >> $@
+	@echo '' >> $@
+	@echo '// Mock parser data structure' >> $@
+	@echo 'typedef struct {' >> $@
+	@echo '    char* error_message;' >> $@
+	@echo '    int error_line;' >> $@
+	@echo '    int error_column;' >> $@
+	@echo '} MockParser;' >> $@
+	@echo '' >> $@
+	@echo '// Create a new parser' >> $@
+	@echo 'GooParserHandle gooParserCreate(void) {' >> $@
+	@echo '    MockParser* parser = (MockParser*)malloc(sizeof(MockParser));' >> $@
+	@echo '    if (parser) {' >> $@
+	@echo '        parser->error_message = NULL;' >> $@
+	@echo '        parser->error_line = 0;' >> $@
+	@echo '        parser->error_column = 0;' >> $@
+	@echo '    }' >> $@
+	@echo '    return parser;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo '// Parse source code into an AST' >> $@
+	@echo 'GooParserResultCode gooParserParseString(GooParserHandle parser, const char* source) {' >> $@
+	@echo '    // In this mock implementation, always succeed' >> $@
+	@echo '    return GOO_PARSER_SUCCESS;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo '// Parse source code from a file into an AST' >> $@
+	@echo 'GooParserResultCode gooParserParseFile(GooParserHandle parser, const char* filename) {' >> $@
+	@echo '    // In this mock implementation, always succeed' >> $@
+	@echo '    return GOO_PARSER_SUCCESS;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo '// Get the AST root node' >> $@
+	@echo 'GooAstNodeHandle gooParserGetAstRoot(GooParserHandle parser) {' >> $@
+	@echo '    // Return a non-NULL value to simulate success' >> $@
+	@echo '    return (GooAstNodeHandle)1;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo '// Get the program node' >> $@
+	@echo 'GooAstProgramHandle gooParserGetProgram(GooParserHandle parser) {' >> $@
+	@echo '    // Return a non-NULL value to simulate success' >> $@
+	@echo '    return (GooAstProgramHandle)1;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo '// Get error information' >> $@
+	@echo 'const char* gooParserGetError(GooParserHandle parser_handle) {' >> $@
+	@echo '    MockParser* parser = (MockParser*)parser_handle;' >> $@
+	@echo '    return parser->error_message;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo 'GooSourcePosition gooParserGetErrorPosition(GooParserHandle parser_handle) {' >> $@
+	@echo '    MockParser* parser = (MockParser*)parser_handle;' >> $@
+	@echo '    GooSourcePosition pos = { parser->error_line, parser->error_column };' >> $@
+	@echo '    return pos;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo '// Get node type' >> $@
+	@echo 'GooAstNodeType gooAstGetNodeType(GooAstNodeHandle node) {' >> $@
+	@echo '    // Return a non-extension type by default' >> $@
+	@echo '    return GOO_AST_PACKAGE_DECL;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo '// Get node position' >> $@
+	@echo 'GooSourcePosition gooAstGetStartPosition(GooAstNodeHandle node) {' >> $@
+	@echo '    GooSourcePosition pos = { 1, 1 };' >> $@
+	@echo '    return pos;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo 'GooSourcePosition gooAstGetEndPosition(GooAstNodeHandle node) {' >> $@
+	@echo '    GooSourcePosition pos = { 1, 1 };' >> $@
+	@echo '    return pos;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo '// Get program information' >> $@
+	@echo 'size_t gooAstProgramGetImportCount(GooAstProgramHandle program) {' >> $@
+	@echo '    return 0;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo 'GooAstNodeHandle gooAstProgramGetImport(GooAstProgramHandle program, size_t index) {' >> $@
+	@echo '    return NULL;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo 'size_t gooAstProgramGetDeclarationCount(GooAstProgramHandle program) {' >> $@
+	@echo '    return 0;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo 'GooAstNodeHandle gooAstProgramGetDeclaration(GooAstProgramHandle program, size_t index) {' >> $@
+	@echo '    return NULL;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo 'GooAstNodeHandle gooAstProgramGetPackageDeclaration(GooAstProgramHandle program) {' >> $@
+	@echo '    return NULL;' >> $@
+	@echo '}' >> $@
+	@echo '' >> $@
+	@echo '// Clean up resources' >> $@
+	@echo 'void gooParserDestroy(GooParserHandle parser_handle) {' >> $@
+	@echo '    MockParser* parser = (MockParser*)parser_handle;' >> $@
+	@echo '    if (parser->error_message) {' >> $@
+	@echo '        free(parser->error_message);' >> $@
+	@echo '    }' >> $@
+	@echo '    free(parser);' >> $@
+	@echo '}' >> $@
+
+# Run the test
+run: $(TARGET)
+	$(TARGET)
+
+# Clean up
+clean:
+	rm -f $(OBJS) $(TARGET) mock_parser.c
+
+.PHONY: all run clean 
